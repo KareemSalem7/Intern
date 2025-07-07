@@ -18,6 +18,9 @@ import {
   Trash2,
   Leaf,
   Globe,
+  CheckCircle,
+  XCircle,
+  Brain,
 } from "lucide-react"
 import Link from "next/link"
 
@@ -66,6 +69,37 @@ export default function VendorDashboard() {
   const handleSustainabilityEvaluation = (vendor) => {
     setSelectedVendorForSustainability(vendor)
     setShowSustainabilityModal(true)
+  }
+
+  const getSustainabilityScore = (sustainability) => {
+    const categories = Object.values(sustainability)
+    const trueCount = categories.filter(Boolean).length
+    return `${trueCount}/5`
+  }
+
+  const getSustainabilityLevel = (sustainability) => {
+    const categories = Object.values(sustainability)
+    const trueCount = categories.filter(Boolean).length
+    
+    if (trueCount >= 4) return "Excellent"
+    if (trueCount >= 3) return "Good"
+    if (trueCount >= 2) return "Fair"
+    return "Poor"
+  }
+
+  const getSustainabilityColor = (level) => {
+    switch (level) {
+      case "Excellent":
+        return "text-green-600 bg-green-100 border-green-200"
+      case "Good":
+        return "text-blue-600 bg-blue-100 border-blue-200"
+      case "Fair":
+        return "text-yellow-600 bg-yellow-100 border-yellow-200"
+      case "Poor":
+        return "text-red-600 bg-red-100 border-red-200"
+      default:
+        return "text-gray-600 bg-gray-100 border-gray-200"
+    }
   }
 
   return (
@@ -339,18 +373,92 @@ export default function VendorDashboard() {
       {/* Sustainability Evaluation Modal */}
       {showSustainabilityModal && selectedVendorForSustainability && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">Sustainability Evaluation</h3>
-            <p className="text-gray-600 mb-4">
+          <div className="bg-white rounded-lg max-w-lg w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold text-gray-900">Sustainability Evaluation</h3>
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getSustainabilityColor(getSustainabilityLevel(selectedVendorForSustainability.sustainability))}`}>
+                {getSustainabilityScore(selectedVendorForSustainability.sustainability)} - {getSustainabilityLevel(selectedVendorForSustainability.sustainability)}
+              </span>
+            </div>
+            <p className="text-gray-600 mb-6">
               Evaluating sustainable practices for <strong>{selectedVendorForSustainability.name}</strong>
             </p>
-            <p className="text-gray-500 text-sm mb-6">
-              This feature is coming soon. You'll be able to analyze vendor sustainability practices, 
-              environmental impact, and compliance with green standards.
-            </p>
-            <div className="flex justify-end">
+            
+            <div className="space-y-4 mb-6">
+              <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Leaf className="h-5 w-5 text-green-600" />
+                  <span className="font-medium text-gray-900">Local Grown</span>
+                </div>
+                {selectedVendorForSustainability.sustainability.localGrown ? (
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                ) : (
+                  <XCircle className="h-5 w-5 text-red-600" />
+                )}
+              </div>
+              
+              <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Leaf className="h-5 w-5 text-green-600" />
+                  <span className="font-medium text-gray-900">Organic</span>
+                </div>
+                {selectedVendorForSustainability.sustainability.organic ? (
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                ) : (
+                  <XCircle className="h-5 w-5 text-red-600" />
+                )}
+              </div>
+              
+              <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Globe className="h-5 w-5 text-blue-600" />
+                  <span className="font-medium text-gray-900">Close Distance</span>
+                </div>
+                {selectedVendorForSustainability.sustainability.closeDistance ? (
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                ) : (
+                  <XCircle className="h-5 w-5 text-red-600" />
+                )}
+              </div>
+              
+              <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Globe className="h-5 w-5 text-blue-600" />
+                  <span className="font-medium text-gray-900">Fair Trade</span>
+                </div>
+                {selectedVendorForSustainability.sustainability.fairTrade ? (
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                ) : (
+                  <XCircle className="h-5 w-5 text-red-600" />
+                )}
+              </div>
+              
+              <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Globe className="h-5 w-5 text-blue-600" />
+                  <span className="font-medium text-gray-900">Carbon Neutral</span>
+                </div>
+                {selectedVendorForSustainability.sustainability.carbonNeutral ? (
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                ) : (
+                  <XCircle className="h-5 w-5 text-red-600" />
+                )}
+              </div>
+            </div>
+            
+            <div className="flex justify-end gap-3">
               <Button 
-                className="bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white"
+                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+                onClick={() => {
+                  // Handle AI analysis
+                  console.log(`AI analyzing sustainability for ${selectedVendorForSustainability.name}`);
+                }}
+              >
+                <Brain className="h-4 w-4 mr-2" />
+                AI Analyze Sustainability
+              </Button>
+              <Button 
+                className="bg-gray-500 hover:bg-gray-600 text-white"
                 onClick={() => {
                   setShowSustainabilityModal(false)
                   setSelectedVendorForSustainability(null)
