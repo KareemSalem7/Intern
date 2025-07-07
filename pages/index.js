@@ -1,174 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Image from "next/image";
-import { supabase } from "../supabaseClient";
-import { apiClient } from "../lib/api-client";
 import { Button } from "../components/button";
 import { ChevronRight, Trophy, Users, BarChart2, Repeat, Shield, Target, Handshake, Ban, Scale, Sparkles } from "lucide-react";
-import SigningInLoading from "../components/SigningInLoading";
 
 import landingPageGraphic from "../assets/landingPageGraphic.png";
 import FootballFantasyFCLogo from "../assets/FootballFantasyFCLogo.png";
 
 export default function Home() {
-  const [session, setSession] = useState(null);
-  const [user, setUser] = useState(null);
-  const [userData, setUserData] = useState();
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasProcessedUser, setHasProcessedUser] = useState(false);
-
-  // Single useEffect to handle all authentication logic
-  useEffect(() => {
-    const handleUserAuthentication = async () => {
-      if (session?.user?.id && !hasProcessedUser) {
-        setIsLoading(true);
-        setHasProcessedUser(true); // Prevent duplicate processing
-        
-        try {
-          console.log("session.user.id", session.user.id);
-          // First, try to get existing user by UID
-          const existingUser = await apiClient.getUser(session.user.id);
-          
-          let userDetails;
-          
-          if (existingUser) {
-            // User exists, use their data
-            userDetails = existingUser;
-            console.log("Existing user found:", userDetails);
-          } else {
-            // User doesn't exist, create new user
-            console.log("Creating new user...");
-            
-            // Get the maximum user ID and increment by 1
-            const maxUserId = await apiClient.getMaxUserId();
-            const newUserId = maxUserId ? maxUserId + 1 : 1;
-            
-            // Create new user
-            const newUser = await apiClient.createUser({
-              user_id: newUserId,
-              email: session.user.email,
-              uid: session.user.id
-            });
-            
-            userDetails = newUser;
-            console.log("New user created:", userDetails);
-          }
-
-          const userContextData = {
-            email: userDetails.email,
-            uid: userDetails.uid,
-            user_id: userDetails.user_id,
-          };
-          setUserData(userContextData);
-          localStorage.setItem('userData', JSON.stringify(userContextData));
-
-          window.location.href = '/thingpage';
-          
-        } catch (error) {
-          console.error("Error checking user existence:", error);
-          setHasProcessedUser(false); // Reset flag on error to allow retry
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    handleUserAuthentication();
-  }, [session, hasProcessedUser]);
-
-  useEffect(() => {
-    const initializeSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setSession(session);
-      setUser(session?.user ?? null);
-    };
-
-    initializeSession();
-  }, []);
-
-  useEffect(() => {
-    // Check for access token in URL
-    const hash = window.location.hash;
-    if (hash) {
-      const params = new URLSearchParams(hash.substring(1));
-      const accessToken = params.get('access_token');
-      if (accessToken) {
-        // Remove the hash from URL
-        window.history.replaceState({}, document.title, window.location.pathname);
-      }
-    }
-  }, []);
-
-  const handleSignIn = async () => {
-    try {
-      const getURL = () => {
-        let url = process?.env?.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000/'
-        url = url.startsWith('http') ? url : `https://${url}`
-        url = url.endsWith('/') ? url : `${url}/`
-        console.log({url})
-        return url
-      }
-
-      const { error, data } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${getURL()}auth/callback`,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          },
-        }
-      });
-      
-      if (error) {
-        console.error("Error signing in:", error);
-      }
-    } catch (error) {
-      console.error("Error signing in:", error);
-    }
-  };
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (!session?.user) {
-        setSession(null);
-        setUserData(null);
-        setHasProcessedUser(false); // Reset flag when user signs out
-        localStorage.removeItem('userData');
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (!error) {
-      setUser(null);
-      setSession(null);
-      setUserData(null);
-      setHasProcessedUser(false);
-    }
-  };
-
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
   };
-
-  // Show loading component while processing user authentication
-  if (isLoading) {
-    return <SigningInLoading />;
-  }
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -198,16 +42,7 @@ export default function Home() {
             </button>
           </nav>
           <div className="flex items-center gap-4">
-            {!user ? (
-              <Button onClick={handleSignIn} variant="outline" className="hidden md:flex">
-                Sign in with Google
-              </Button>
-            ) : (
-              <>
-                <span className="text-sm text-muted-foreground">{user.email}</span>
-                <Button onClick={signOut} variant="outline">Sign out</Button>
-              </>
-            )}
+            <span className="text-sm text-muted-foreground">smoothie master</span>
           </div>
         </div>
       </header>
