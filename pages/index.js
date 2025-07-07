@@ -14,14 +14,18 @@ export default function Home() {
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState();
   const [isLoading, setIsLoading] = useState(false);
+  const [hasProcessedUser, setHasProcessedUser] = useState(false);
 
+  // Single useEffect to handle all authentication logic
   useEffect(() => {
-    const checkUserDetails = async () => {
-      if (session?.user?.id) {
+    const handleUserAuthentication = async () => {
+      if (session?.user?.id && !hasProcessedUser) {
         setIsLoading(true);
+        setHasProcessedUser(true); // Prevent duplicate processing
+        
         try {
+          console.log("session.user.id", session.user.id);
           // First, try to get existing user by UID
-          console.log("session.user.id", session.user.id)
           const existingUser = await apiClient.getUser(session.user.id);
           
           let userDetails;
@@ -61,14 +65,15 @@ export default function Home() {
           
         } catch (error) {
           console.error("Error checking user existence:", error);
+          setHasProcessedUser(false); // Reset flag on error to allow retry
         } finally {
           setIsLoading(false);
         }
       }
     };
 
-    checkUserDetails();
-  }, [session]);
+    handleUserAuthentication();
+  }, [session, hasProcessedUser]);
 
   useEffect(() => {
     const initializeSession = async () => {
@@ -132,121 +137,16 @@ export default function Home() {
       setSession(session);
       setUser(session?.user ?? null);
       
-      if (session?.user) {
-        setIsLoading(true);
-        try {
-          // First, try to get existing user by UID
-          const existingUser = await apiClient.getUser(session.user.id);
-          
-          let userDetails;
-          
-          if (existingUser) {
-            // User exists, use their data
-            userDetails = existingUser;
-            console.log("Existing user found:", userDetails);
-          } else {
-            // User doesn't exist, create new user
-            console.log("Creating new user...");
-            
-            // Get the maximum user ID and increment by 1
-            const maxUserId = await apiClient.getMaxUserId();
-            const newUserId = maxUserId ? maxUserId + 1 : 1;
-            
-            // Create new user
-            const newUser = await apiClient.createUser({
-              user_id: newUserId,
-              email: session.user.email,
-              uid: session.user.id
-            });
-            
-            userDetails = newUser;
-            console.log("New user created:", userDetails);
-          }
-
-          const userContextData = {
-            email: userDetails.email,
-            uid: userDetails.uid,
-            user_id: userDetails.user_id
-          };
-          setUserData(userContextData);
-          // Store in localStorage for persistence
-          localStorage.setItem('userData', JSON.stringify(userContextData));
-          
-          try {
-            // Redirect to draft page if user has a league
-            window.location.href = '/thingpage';
-          } catch (error) {
-            console.error("Error fetching available players:", error);
-          }
-          
-        } catch (error) {
-          console.error("Error checking user existence:", error);
-        } finally {
-          setIsLoading(false);
-        }
-      } else {
+      if (!session?.user) {
         setSession(null);
         setUserData(null);
+        setHasProcessedUser(false); // Reset flag when user signs out
         localStorage.removeItem('userData');
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [setUserData]);
-
-  // Add a new effect to check user data on mount
-  useEffect(() => {
-    const checkUserData = async () => {
-      if (user && !userData) {
-        setIsLoading(true);
-        try {
-          // First, try to get existing user by UID
-          const existingUser = await apiClient.getUser(user.id);
-          
-          let userDetails;
-          
-          if (existingUser) {
-            // User exists, use their data
-            userDetails = existingUser;
-            console.log("Existing user found:", userDetails);
-          } else {
-            // User doesn't exist, create new user
-            console.log("Creating new user...");
-            
-            // Get the maximum user ID and increment by 1
-            const maxUserId = await apiClient.getMaxUserId();
-            const newUserId = maxUserId ? maxUserId + 1 : 1;
-            
-            // Create new user
-            const newUser = await apiClient.createUser({
-              user_id: newUserId,
-              email: user.email,
-              uid: user.id
-            });
-            
-            userDetails = newUser;
-            console.log("New user created:", userDetails);
-          }
-
-          const userContextData = {
-            email: userDetails.email,
-            uid: userDetails.uid,
-            user_id: userDetails.user_id
-          };
-          setUserData(userContextData);
-          localStorage.setItem('userData', JSON.stringify(userContextData));
-          
-          window.location.href = '/thingpage';
-        } catch (error) {
-          console.error("Error checking user data:", error);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    checkUserData();
-  }, [user, userData, setUserData]);
+  }, []);
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
@@ -254,6 +154,7 @@ export default function Home() {
       setUser(null);
       setSession(null);
       setUserData(null);
+      setHasProcessedUser(false);
     }
   };
 
