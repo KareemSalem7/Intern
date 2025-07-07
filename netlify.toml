@@ -1,32 +1,16 @@
 [build]
   command = "npm run build"
-  publish = "."  # use root directory, not "out" when using the plugin
+  publish = ".next"
 
 [build.environment]
+  NEXT_USE_NETLIFY_EDGE = "true"
   NODE_VERSION = "18"
   NEXT_TELEMETRY_DISABLED = "1"
   NODE_ENV = "production"
   NEXT_PUBLIC_BASE_URL = "https://intern-api.fly.dev"
   NEXT_PUBLIC_SITE_URL = "https://mcintern.netlify.app"
   NEXT_PUBLIC_SUPABASE_URL = "https://dnrtnzpehfifeyffayqo.supabase.co"
-  NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRucnRuenBlaGZpZmV5ZmZheXFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4NDczNDAsImV4cCI6MjA2NzQyMzM0MH0.07kkjshEJGr2x0dIuZmdMnFT1jV4FySz-8SqB5p78H0"
+  NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-
-# Optional: Remove this redirect block unless you're exporting a static site
-# Netlify plugin handles routing for SSR automatically.
-# Keep only if you're still experimenting with next export
-# [[redirects]]
-#   from = "/*"
-#   to = "/index.html"
-#   status = 200
-
-[[headers]]
-  for = "/*"
-  [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    X-Content-Type-Options = "nosniff"
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
