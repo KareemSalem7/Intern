@@ -13,11 +13,42 @@ export default function Home() {
   const [session, setSession] = useState(null);
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState();
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const checkUserDetails = async () => {
       if (session?.user?.id) {
+        setIsLoading(true);
         try {
+          // First, try to get existing user by UID
+          console.log("session.user.id", session.user.id)
+          const existingUser = await apiClient.getUser(session.user.id);
+          
+          let userDetails;
+          
+          if (existingUser) {
+            // User exists, use their data
+            userDetails = existingUser;
+            console.log("Existing user found:", userDetails);
+          } else {
+            // User doesn't exist, create new user
+            console.log("Creating new user...");
+            
+            // Get the maximum user ID and increment by 1
+            const maxUserId = await apiClient.getMaxUserId();
+            const newUserId = maxUserId ? maxUserId + 1 : 1;
+            
+            // Create new user
+            const newUser = await apiClient.createUser({
+              user_id: newUserId,
+              email: session.user.email,
+              uid: session.user.id
+            });
+            
+            userDetails = newUser;
+            console.log("New user created:", userDetails);
+          }
+
           const userContextData = {
             email: userDetails.email,
             uid: userDetails.uid,
@@ -30,7 +61,9 @@ export default function Home() {
           
         } catch (error) {
           console.error("Error checking user existence:", error);
-        } 
+        } finally {
+          setIsLoading(false);
+        }
       }
     };
 
@@ -100,11 +133,40 @@ export default function Home() {
       setUser(session?.user ?? null);
       
       if (session?.user) {
+        setIsLoading(true);
         try {
+          // First, try to get existing user by UID
+          const existingUser = await apiClient.getUser(session.user.id);
+          
+          let userDetails;
+          
+          if (existingUser) {
+            // User exists, use their data
+            userDetails = existingUser;
+            console.log("Existing user found:", userDetails);
+          } else {
+            // User doesn't exist, create new user
+            console.log("Creating new user...");
+            
+            // Get the maximum user ID and increment by 1
+            const maxUserId = await apiClient.getMaxUserId();
+            const newUserId = maxUserId ? maxUserId + 1 : 1;
+            
+            // Create new user
+            const newUser = await apiClient.createUser({
+              user_id: newUserId,
+              email: session.user.email,
+              uid: session.user.id
+            });
+            
+            userDetails = newUser;
+            console.log("New user created:", userDetails);
+          }
+
           const userContextData = {
             email: userDetails.email,
             uid: userDetails.uid,
-            user_id: userDetails
+            user_id: userDetails.user_id
           };
           setUserData(userContextData);
           // Store in localStorage for persistence
@@ -119,6 +181,8 @@ export default function Home() {
           
         } catch (error) {
           console.error("Error checking user existence:", error);
+        } finally {
+          setIsLoading(false);
         }
       } else {
         setSession(null);
@@ -134,7 +198,35 @@ export default function Home() {
   useEffect(() => {
     const checkUserData = async () => {
       if (user && !userData) {
+        setIsLoading(true);
         try {
+          // First, try to get existing user by UID
+          const existingUser = await apiClient.getUser(user.id);
+          
+          let userDetails;
+          
+          if (existingUser) {
+            // User exists, use their data
+            userDetails = existingUser;
+            console.log("Existing user found:", userDetails);
+          } else {
+            // User doesn't exist, create new user
+            console.log("Creating new user...");
+            
+            // Get the maximum user ID and increment by 1
+            const maxUserId = await apiClient.getMaxUserId();
+            const newUserId = maxUserId ? maxUserId + 1 : 1;
+            
+            // Create new user
+            const newUser = await apiClient.createUser({
+              user_id: newUserId,
+              email: user.email,
+              uid: user.id
+            });
+            
+            userDetails = newUser;
+            console.log("New user created:", userDetails);
+          }
 
           const userContextData = {
             email: userDetails.email,
@@ -147,6 +239,8 @@ export default function Home() {
           window.location.href = '/thingpage';
         } catch (error) {
           console.error("Error checking user data:", error);
+        } finally {
+          setIsLoading(false);
         }
       }
     };
@@ -169,6 +263,11 @@ export default function Home() {
       element.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
+  // Show loading component while processing user authentication
+  if (isLoading) {
+    return <SigningInLoading />;
+  }
 
   return (
     <div className="flex min-h-screen flex-col">

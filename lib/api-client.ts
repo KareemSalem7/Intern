@@ -77,13 +77,64 @@ export const apiClient = {
 
   // Check if a user exists by UID
   async getUser(uid: string): Promise<User | null> {
+    console.log("baseUrl", baseUrl);
     const response = await fetchWithFallback(`${baseUrl}/api/v1/users/${uid}`);
+    console.log("my response", response)
+
+    if (response.status === 204) {
+      return null; // Return null if the user is not found (204 No Content)
+    }
 
     if (!response.ok) {
-      return null; // Return null if the user is not found or an error occurs
+      return null; // Return null for other error cases
     }
 
     return handleResponse<User>(response);
+  },
+
+  // Get all users
+  async getAllUsers(): Promise<User[]> {
+    console.log("baseUrl", baseUrl);
+    const response = await fetchWithFallback(`${baseUrl}/api/v1/users`);
+    return handleResponse<User[]>(response);
+  },
+
+  // Get maximum user ID
+  async getMaxUserId(): Promise<number> {
+    const response = await fetchWithFallback(`${baseUrl}/api/v1/users/max-id`);
+    return handleResponse<number>(response);
+  },
+
+  // Create a new user
+  async createUser(user: Omit<User, 'user_id'> & { user_id: number }): Promise<User> {
+    const response = await fetchWithFallback(`${baseUrl}/api/v1/users`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(user),
+    });
+    return handleResponse<User>(response);
+  },
+
+  // Update an existing user
+  async updateUser(userId: number, user: Partial<User>): Promise<void> {
+    const response = await fetchWithFallback(`${baseUrl}/api/v1/users/${userId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(user),
+    });
+    return handleResponse<void>(response);
+  },
+
+  // Delete a user
+  async deleteUser(userId: number): Promise<void> {
+    const response = await fetchWithFallback(`${baseUrl}/api/v1/users/${userId}`, {
+      method: 'DELETE',
+    });
+    return handleResponse<void>(response);
   },
 
   // Get all things

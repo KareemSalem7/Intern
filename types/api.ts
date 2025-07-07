@@ -1,7 +1,8 @@
 // objects and such
 export interface User {
-    uid: string;
+    user_id: number;
     email: string;
+    uid: string;
 }
 
 export interface Thing {
