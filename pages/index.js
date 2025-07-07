@@ -221,12 +221,21 @@ export default function RawMaterialsDashboard() {
                       <td className="py-3 font-medium">${material.costPerUnit}</td>
                       <td className="py-3 text-gray-600">{material.lastOrdered}</td>
                       <td className="py-3">
-                        <div className="relative">
-                          <button className="inline-flex items-center px-3 py-1.5 border border-orange-300 text-orange-700 text-sm rounded-md hover:bg-orange-100 hover:border-orange-400 bg-transparent">
-                            View Vendors
-                            <ChevronDown className="ml-2 h-4 w-4" />
-                          </button>
-                        </div>
+                        {material.name === "Organic Strawberries" ? (
+                          <Link href="/vendors">
+                            <button className="inline-flex items-center px-3 py-1.5 border border-orange-300 text-orange-700 text-sm rounded-md hover:bg-orange-100 hover:border-orange-400 bg-transparent">
+                              View Vendors
+                              <ChevronDown className="ml-2 h-4 w-4" />
+                            </button>
+                          </Link>
+                        ) : (
+                          <div className="relative">
+                            <button className="inline-flex items-center px-3 py-1.5 border border-orange-300 text-orange-700 text-sm rounded-md hover:bg-orange-100 hover:border-orange-400 bg-transparent">
+                              View Vendors
+                              <ChevronDown className="ml-2 h-4 w-4" />
+                            </button>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))}
