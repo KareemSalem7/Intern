@@ -1,6 +1,6 @@
 [build]
-  command = "npm install && npm run build"
-  publish = ".next"
+  command = "npm run build"
+  publish = "out"
 
 [build.environment]
   NEXT_USE_NETLIFY_EDGE = "true"
@@ -8,6 +8,7 @@
   NEXT_TELEMETRY_DISABLED = "1"
   NODE_ENV = "production"
   NEXT_PUBLIC_BASE_URL = "https://intern-api.fly.dev"
+  NEXT_PUBLIC_SITE_URL = "https://mcintern.netlify.app"
   NEXT_PUBLIC_SUPABASE_URL = "https://dnrtnzpehfifeyffayqo.supabase.co"
   NEXT_PUBLIC_SUPABASE_ANON_KEY= "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRucnRuenBlaGZpZmV5ZmZheXFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4NDczNDAsImV4cCI6MjA2NzQyMzM0MH0.07kkjshEJGr2x0dIuZmdMnFT1jV4FySz-8SqB5p78H0"
 [[redirects]]
