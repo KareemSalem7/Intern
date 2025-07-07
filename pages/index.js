@@ -101,7 +101,8 @@ export default function Home() {
   const handleSignIn = async () => {
     try {
       const getURL = () => {
-        let url = process?.env?.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000/'
+        // let url = process?.env?.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000/'
+        let url = process?.env?.NEXT_PUBLIC_SITE_URL ?? 'https://mcintern.netlify.app/'
         url = url.startsWith('http') ? url : `https://${url}`
         url = url.endsWith('/') ? url : `${url}/`
         console.log({url})
